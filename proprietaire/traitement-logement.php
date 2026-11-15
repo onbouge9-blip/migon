@@ -2,6 +2,7 @@
 declare(strict_types=1);
 session_start();
 require_once __DIR__ . '/../classes/Database.php';
+require_once __DIR__ . '/../classes/Geolocalisation.php';
 
 function echouer(string $message): never
 {
@@ -52,6 +53,10 @@ $adresse = nettoyer((string) ($_POST['adresse'] ?? ''));
 $ville = nettoyer((string) ($_POST['ville'] ?? 'Cotonou'));
 $quartier = nettoyer((string) ($_POST['quartier'] ?? ''));
 $typeLogement = (string) ($_POST['type_logement'] ?? '');
+$positionLogement = Geolocalisation::valider(
+    $_POST['latitude'] ?? '',
+    $_POST['longitude'] ?? ''
+);
 
 if (
     $titre === '' ||
@@ -62,6 +67,12 @@ if (
 ) {
     echouer('Remplis tous les champs obligatoires correctement.');
 }
+
+if ($positionLogement === null) {
+    echouer('Indique la position géographique du logement (bouton GPS ou clic sur la carte).');
+}
+
+[$latitude, $longitude] = $positionLogement;
 
 if (mb_strlen($titre) > 180 || mb_strlen($ville) > 120 ||
     mb_strlen($adresse) > 255 || mb_strlen($quartier) > 120) {
@@ -237,24 +248,46 @@ try {
      * Créer le logement en brouillon.
      * La publication n'est pas automatique.
      */
-    $requeteLogement = $pdo->prepare(
-        "INSERT INTO logement
-            (id_proprietaire, titre, description, adresse, ville,
-             quartier, type_logement, statut)
-         VALUES
-            (:id_proprietaire, :titre, :description, :adresse, :ville,
-             :quartier, :type_logement, 'brouillon')"
-    );
+   $requeteLogement = $pdo->prepare(
+    "INSERT INTO logement
+        (
+            id_proprietaire,
+            titre,
+            description,
+            adresse,
+            ville,
+            quartier,
+            latitude,
+            longitude,
+            type_logement,
+            statut
+        )
+     VALUES
+        (
+            :id_proprietaire,
+            :titre,
+            :description,
+            :adresse,
+            :ville,
+            :quartier,
+            :latitude,
+            :longitude,
+            :type_logement,
+            'brouillon'
+        )"
+);
 
-    $requeteLogement->execute([
-        'id_proprietaire' => $idProprietaire,
-        'titre' => $titre,
-        'description' => $description,
-        'adresse' => $adresse,
-        'ville' => $ville,
-        'quartier' => $quartier !== '' ? $quartier : null,
-        'type_logement' => $typeLogement,
-    ]);
+   $requeteLogement->execute([
+    'id_proprietaire' => $idProprietaire,
+    'titre' => $titre,
+    'description' => $description,
+    'adresse' => $adresse,
+    'ville' => $ville,
+    'quartier' => $quartier !== '' ? $quartier : null,
+    'latitude' => $latitude,
+    'longitude' => $longitude,
+    'type_logement' => $typeLogement,
+]);
 
     $idLogement = (int) $pdo->lastInsertId();
 

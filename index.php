@@ -1,7 +1,8 @@
-
 <?php
 
 session_start();
+
+require_once __DIR__ . '/classes/Database.php';
 
 $connecte = isset($_SESSION['utilisateur_id']);
 $nomUtilisateur = $_SESSION['utilisateur_nom'] ?? '';
@@ -16,7 +17,87 @@ function h(string $valeur): string
     return htmlspecialchars($valeur, ENT_QUOTES, 'UTF-8');
 }
 
+$logements = [];
+$erreurChargement = false;
+
+try {
+    $pdo = (new Database())->getConnection();
+
+    $sql = "
+        SELECT
+            l.id_logement,
+            l.titre,
+            l.description,
+            l.ville,
+            l.quartier,
+            l.type_logement,
+
+            (
+                SELECT MIN(t.prix)
+                FROM tarif_location t
+                WHERE t.id_logement = l.id_logement
+            ) AS prix_min,
+
+            (
+                SELECT t.devise
+                FROM tarif_location t
+                WHERE t.id_logement = l.id_logement
+                ORDER BY t.prix ASC
+                LIMIT 1
+            ) AS devise,
+
+            (
+                SELECT t.duree_location
+                FROM tarif_location t
+                WHERE t.id_logement = l.id_logement
+                ORDER BY t.prix ASC
+                LIMIT 1
+            ) AS duree_location,
+
+          (
+    SELECT p.id_photo
+    FROM photo_logement p
+    WHERE p.id_logement = l.id_logement
+    ORDER BY p.est_principale DESC,
+             p.ordre_affichage ASC,
+             p.id_photo ASC
+    LIMIT 1
+) AS id_photo
+
+        FROM logement l
+
+        WHERE l.statut = 'publie'
+          AND l.disponibilite = 'disponible'
+          AND l.date_suppression IS NULL
+
+        ORDER BY l.date_creation DESC
+        LIMIT 12
+    ";
+
+    $stmt = $pdo->query($sql);
+    $logements = $stmt->fetchAll();
+
+} catch (Throwable $e) {
+    error_log('Erreur chargement logements MIGON : ' . $e->getMessage());
+    $erreurChargement = true;
+}
+
+$nombreNotificationsNonLues = 0;
+
+if (isset($_SESSION['utilisateur_id'])) {
+    
+    require_once __DIR__ . '/classes/Notifications.php';
+
+    $pdo = (new Database())->getConnection();
+
+    $nombreNotificationsNonLues = Notifications::compterNonLues(
+        $pdo,
+        (int) $_SESSION['utilisateur_id']
+    );
+}
+
 ?>
+
 <!DOCTYPE html>
 <html lang="fr">
 <head>
@@ -71,6 +152,88 @@ function h(string $valeur): string
             gap: 20px;
             flex-wrap: wrap;
         }
+    
+.migon-logements {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+}
+
+.migon-logement {
+    overflow: hidden;
+    background: #fff;
+    border: 1px solid #e8eee9;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(24, 48, 43, 0.05);
+}
+
+.migon-logement-photo,
+.migon-logement-sans-photo {
+    display: block;
+    width: 100%;
+    height: 220px;
+}
+
+.migon-logement-photo {
+    object-fit: cover;
+}
+
+.migon-logement-sans-photo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #66766e;
+    background: #e7f5ee;
+}
+
+.migon-logement-contenu {
+    padding: 20px;
+}
+
+.migon-logement-type {
+    color: #087f5b;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.migon-logement h3 {
+    margin: 12px 0 8px;
+    font-size: 19px;
+}
+
+.migon-logement-lieu {
+    color: #66766e;
+    font-size: 14px;
+}
+
+.migon-logement-prix {
+    margin: 16px 0;
+    color: #344b44;
+}
+
+.migon-logement-prix strong {
+    color: #087f5b;
+    font-size: 18px;
+}
+
+.migon-logement-description {
+    color: #66766e;
+    font-size: 14px;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+    .migon-logements {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 560px) {
+    .migon-logements {
+        grid-template-columns: 1fr;
+    }
+}
 
         .migon-links a {
             color: #344b44;
@@ -264,7 +427,21 @@ function h(string $valeur): string
             color: #087f5b;
             font-weight: 700;
         }
-
+.badge-notifications {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    height: 24px;
+    padding: 0 6px;
+    margin-left: 6px;
+    border-radius: 50px;
+    background: #dc2626;
+    color: white;
+    font-size: 13px;
+    font-weight: bold;
+    vertical-align: middle;
+}
         @media (max-width: 760px) {
             .migon-nav {
                 align-items: flex-start;
@@ -311,17 +488,32 @@ function h(string $valeur): string
             <a href="#avantages">Nos avantages</a>
 
             <?php if ($connecte): ?>
-                <span class="migon-user">
-                    Bonjour, <?= h((string) $nomUtilisateur) ?>
-                </span>
+<?php if (in_array('proprietaire', $roles, true)): ?>
+    <a href="proprietaire/index.php">
+        Mon espace propriétaire
+    </a>
+<?php endif; ?>
 
-                <?php if (in_array('proprietaire', $roles, true)): ?>
-                    <a href="proprietaire/index.php">Mon espace propriétaire</a>
-                <?php endif; ?>
+<?php if (in_array('chercheur', $roles, true)): ?>
+    <a href="chercheur/index.php">
+        Mon espace chercheur
+    </a>
+<?php endif; ?>
 
-                <?php if (in_array('administrateur', $roles, true)): ?>
-                    <a href="admin/index.php">Administration</a>
-                <?php endif; ?>
+<?php if (in_array('administrateur', $roles, true)): ?>
+    <a href="admin/index.php">
+        Administration
+    </a>
+<?php endif; ?>
+
+<a href="notifications.php">
+    Mes notifications
+    <?php if ($nombreNotificationsNonLues > 0): ?>
+        <span class="badge-notifications">
+            <?= $nombreNotificationsNonLues ?>
+        </span>
+    <?php endif; ?>
+</a>
 
                 <a class="migon-button migon-button-light"
                    href="deconnexion.php">Se déconnecter</a>
@@ -331,6 +523,7 @@ function h(string $valeur): string
                    href="inscription.php">Créer un compte</a>
             <?php endif; ?>
         </div>
+
     </nav>
 </header>
 
@@ -423,6 +616,111 @@ function h(string $valeur): string
             </article>
         </div>
     </section>
+   
+<section class="migon-section" id="logements">
+    <div class="migon-section-heading">
+        <h2>Les logements disponibles</h2>
+        <p>
+            Découvrez les logements publiés sur MIGON
+            et trouvez celui qui correspond à vos besoins.
+        </p>
+    </div>
+
+    <?php if ($erreurChargement): ?>
+
+        <p>
+            Impossible de charger les logements pour le moment.
+            Réessaie plus tard.
+        </p>
+
+    <?php elseif (empty($logements)): ?>
+
+        <p style="text-align:center;">
+            Aucun logement n'est disponible pour le moment.
+            Revenez bientôt découvrir les nouvelles annonces.
+        </p>
+
+    <?php else: ?>
+
+        <div class="migon-logements">
+
+            <?php foreach ($logements as $logement): ?>
+
+                <article class="migon-logement">
+
+                   <?php if (!empty($logement['id_photo'])): ?>
+    <img
+        class="migon-logement-photo"
+        src="proprietaire/afficher-photo.php?id=<?= (int) $logement['id_logement'] ?>&amp;photo=<?= (int) $logement['id_photo'] ?>"
+        alt="<?= h($logement['titre']) ?>"
+        loading="lazy"
+    >
+<?php else: ?>
+                        <div class="migon-logement-sans-photo">
+                            Photo non disponible
+                        </div>
+                    <?php endif; ?>
+
+                    <div class="migon-logement-contenu">
+
+                        <span class="migon-logement-type">
+                            <?= h(ucfirst($logement['type_logement'])) ?>
+                        </span>
+
+                        <h3><?= h($logement['titre']) ?></h3>
+
+                        <p class="migon-logement-lieu">
+                            <?= h($logement['quartier'] ?? '') ?>
+                            <?= !empty($logement['quartier']) ? ' — ' : '' ?>
+                            <?= h($logement['ville']) ?>
+                        </p>
+
+                        <?php if ($logement['prix_min'] !== null): ?>
+                            <p class="migon-logement-prix">
+                                À partir de
+                                <strong>
+                                    <?= number_format(
+                                        (float) $logement['prix_min'],
+                                        0,
+                                        ',',
+                                        ' '
+                                    ) ?>
+                                    <?= h($logement['devise'] ?? 'XOF') ?>
+                                </strong>
+                                <?php if (!empty($logement['duree_location'])): ?>
+                                    / <?= h($logement['duree_location']) ?>
+                                <?php endif; ?>
+                            </p>
+                        <?php else: ?>
+                            <p>Prix à consulter</p>
+                        <?php endif; ?>
+
+                        <p class="migon-logement-description">
+                            <?= h(mb_strimwidth(
+                                (string) ($logement['description'] ?? ''),
+                                0,
+                                110,
+                                '…',
+                                'UTF-8'
+                            )) ?>
+                        </p>
+
+                        <a
+                            class="migon-button migon-button-primary"
+                            href="details-logement.php?id=<?= (int) $logement['id_logement'] ?>"
+                        >
+                            Voir les détails
+                        </a>
+
+                    </div>
+                </article>
+
+            <?php endforeach; ?>
+
+        </div>
+
+    <?php endif; ?>
+</section>
 
     <section class="migon-cta">
         <h2>Prêt à utiliser MIGON ?</h2>

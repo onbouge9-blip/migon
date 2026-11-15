@@ -1,4 +1,3 @@
-
 <?php
 session_start();
 if (empty($_SESSION['csrf_token'])) {
@@ -31,6 +30,7 @@ unset($_SESSION['erreur_logement']);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ajouter un logement | MIGON</title>
     <link rel="stylesheet" href="../public/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
     <style>
         .conteneur {
             max-width: 850px;
@@ -115,7 +115,15 @@ unset($_SESSION['erreur_logement']);
             color: #59645f;
             font-size: 14px;
         }
-         .retour {
+         .carte-position {
+            height: 300px;
+            margin-top: 10px;
+            border: 1px solid #cbd5d0;
+            border-radius: 10px;
+            z-index: 0;
+        }
+
+        .retour {
             display: inline-block;
             margin-bottom: 10px;
              background:#123b32;
@@ -226,6 +234,29 @@ unset($_SESSION['erreur_logement']);
             </div>
 
             <div class="section">
+                <h2>Position géographique *</h2>
+
+                <p class="aide">
+                    Indiquez l'emplacement exact du logement : c'est ce qui permet
+                    aux chercheurs de le trouver « autour d'eux ». Placez-vous au
+                    niveau du logement puis utilisez votre position actuelle, ou
+                    cliquez sur la carte pour placer le repère (vous pouvez ensuite
+                    le déplacer).
+                </p>
+
+                <button type="button" class="bouton" id="btn-position">
+                    📍 Utiliser ma position actuelle
+                </button>
+
+                <p id="message-position" class="aide" aria-live="polite"></p>
+
+                <div id="carte-position" class="carte-position"></div>
+
+                <input type="hidden" name="latitude" id="latitude">
+                <input type="hidden" name="longitude" id="longitude">
+            </div>
+
+            <div class="section">
                 <h2>Tarifs de location</h2>
                 <p class="aide">
                     Renseignez au moins un tarif. Les montants sont en francs CFA (XOF).
@@ -307,6 +338,17 @@ unset($_SESSION['erreur_logement']);
         </form>
     </section>
 </main>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="../public/js/position-logement.js"></script>
+<script>
+MigonPosition.init({
+    boutonId: 'btn-position',
+    messageId: 'message-position',
+    latId: 'latitude',
+    lngId: 'longitude',
+    carteId: 'carte-position',
+    obligatoire: true
+});
+</script>
 </body>
 </html>

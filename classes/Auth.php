@@ -1,4 +1,3 @@
-
 <?php
 
 class Auth
@@ -15,4 +14,3 @@ class Auth
         return password_verify($password, $hashedPassword);
     }
 }
-?>

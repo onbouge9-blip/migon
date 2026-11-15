@@ -126,3 +126,356 @@ small {
         font-size: 24px;
     }
 }
+
+/* =====================================================
+   MIGON - ÉLÉMENTS COMMUNS
+===================================================== */
+
+:root {
+    --migon-vert: #176b57;
+    --migon-vert-fonce: #105342;
+    --migon-vert-clair: #e8f3ef;
+
+    --texte-principal: #172033;
+    --texte-secondaire: #687386;
+
+    --fond-page: #f3f6fa;
+    --blanc: #ffffff;
+
+    --bordure: #d7deea;
+
+    --danger: #a32020;
+    --danger-fond: #fff0f0;
+
+    --succes: #176b57;
+    --succes-fond: #e8f7f1;
+}
+
+
+/* Conteneur général des pages */
+
+.container {
+    width: min(1180px, 92%);
+    margin: 35px auto;
+}
+
+
+/* Cartes communes */
+
+.card,
+.carte {
+    background: var(--blanc);
+    border-radius: 14px;
+    border: 1px solid var(--bordure);
+    box-shadow: 0 8px 25px rgba(20, 40, 70, 0.05);
+}
+
+
+/* Bouton principal commun */
+
+.bouton,
+.btn,
+.btn-principal {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+
+    padding: 12px 18px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: var(--migon-vert);
+    color: #ffffff;
+
+    font: inherit;
+    font-weight: 700;
+
+    text-decoration: none;
+    cursor: pointer;
+
+    transition:
+        background 0.2s ease,
+        transform 0.2s ease;
+}
+
+.bouton:hover,
+.btn:hover,
+.btn-principal:hover {
+    background: var(--migon-vert-fonce);
+    transform: translateY(-1px);
+}
+
+
+/* Bouton secondaire */
+
+.btn-secondaire {
+    background: var(--migon-vert-clair);
+    color: var(--migon-vert);
+}
+
+.btn-secondaire:hover {
+    background: #d7ebe3;
+}
+
+
+/* Messages */
+
+.message {
+    margin: 15px 0;
+    padding: 13px 16px;
+    border-radius: 8px;
+    line-height: 1.5;
+}
+
+.message.succes {
+    background: var(--succes-fond);
+    color: var(--succes);
+    border-left: 4px solid var(--migon-vert);
+}
+
+.message.erreur {
+    background: var(--danger-fond);
+    color: var(--danger);
+    border-left: 4px solid #d64545;
+}
+
+
+/* Texte secondaire */
+
+.texte-secondaire {
+    color: var(--texte-secondaire);
+    line-height: 1.6;
+}
+
+
+/* Lien de retour */
+
+.retour {
+    display: inline-flex;
+    align-items: center;
+    margin-bottom: 20px;
+
+    color: var(--migon-vert);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.retour:hover {
+    text-decoration: underline;
+}
+
+
+/* Responsive */
+
+@media (max-width: 600px) {
+
+    .container {
+        width: min(94%, 1180px);
+        margin: 25px auto;
+    }
+
+    .bouton,
+    .btn {
+        width: 100%;
+    }
+}
+/* =========================================
+   PAGE DES NOTIFICATIONS - MIGON
+========================================= */
+
+.container {
+    width: min(900px, 92%);
+    margin: 40px auto;
+}
+
+.notifications-section {
+    background: #ffffff;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 8px 25px rgba(20, 40, 70, 0.08);
+}
+
+.notifications-section h1 {
+    margin: 0 0 10px;
+    color: #172033;
+    font-size: 30px;
+}
+
+.notifications-section > p {
+    color: #687386;
+    line-height: 1.6;
+}
+
+.notifications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 25px;
+}
+
+.notification-card {
+    padding: 20px;
+    background: #ffffff;
+    border: 1px solid #e1e6ed;
+    border-radius: 12px;
+    transition: 0.2s ease;
+}
+
+.notification-card:hover {
+    box-shadow: 0 5px 18px rgba(20, 40, 70, 0.08);
+}
+
+.notification-non-lue {
+    background: #f0faf6;
+    border-left: 5px solid #176b57;
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.notification-header h2 {
+    margin: 0;
+    color: #172033;
+    font-size: 19px;
+}
+
+.notification-type {
+    padding: 5px 10px;
+    border-radius: 20px;
+    background: #e8f4ef;
+    color: #176b57;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.notification-date {
+    margin: 10px 0 5px;
+    color: #7a8594;
+    font-size: 13px;
+}
+
+.notification-status {
+    margin: 8px 0;
+    font-size: 13px;
+    color: #687386;
+}
+
+.notification-status strong {
+    color: #176b57;
+}
+
+.notification-content {
+    margin-top: 12px;
+    padding: 14px;
+    background: #f6f8fa;
+    border-radius: 8px;
+    color: #344054;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.notification-action {
+    margin-top: 16px;
+}
+
+.notification-action .bouton {
+    display: inline-block;
+    padding: 11px 16px;
+    border: 0;
+    border-radius: 8px;
+    background: #176b57;
+    color: #ffffff;
+    font: inherit;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.notification-action .bouton:hover {
+    background: #105342;
+}
+
+/* Message de succès */
+.message.succes {
+    width: min(900px, 92%);
+    margin: 20px auto 0;
+    padding: 14px 18px;
+    border-radius: 10px;
+    background: #e8f7ef;
+    color: #176b57;
+    font-weight: 600;
+}
+
+/* Version mobile */
+@media (max-width: 600px) {
+    .container {
+        width: min(94%, 900px);
+        margin: 20px auto;
+    }
+
+    .notifications-section {
+        padding: 20px;
+    }
+
+    .notification-header {
+        flex-direction: column;
+    }
+
+    .notification-header h2 {
+        font-size: 17px;
+    }
+}
+/* Bouton retour - Notifications */
+.bouton-retour {
+    display: inline-block;
+    margin-bottom: 18px;
+    color: #176b57;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.bouton-retour:hover {
+    text-decoration: none;
+ color: #087f5b;
+}
+
+/* Barre « Tout marquer comme lu » - Notifications */
+.notifications-barre {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.notifications-barre p {
+    margin: 0;
+    color: #687386;
+    line-height: 1.6;
+}
+
+.notifications-barre form {
+    margin: 0;
+}
+
+.bouton-tout-lire {
+    display: inline-block;
+    padding: 11px 16px;
+    border: 0;
+    border-radius: 8px;
+    background: #176b57;
+    color: #ffffff;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.bouton-tout-lire:hover {
+    background: #105342;
+}

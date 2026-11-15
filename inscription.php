@@ -1,4 +1,3 @@
-
 <?php
 session_start();
 if (empty($_SESSION['csrf_token'])) {
@@ -28,15 +27,6 @@ if (isset($_SESSION['utilisateur_id'])) {
             Trouvez ou proposez un logement en toute simplicité.
         </p>
    <?php if (!empty($_SESSION['succes_inscription'])): ?>
-    <p class="message succes">
-        <?= htmlspecialchars(
-            $_SESSION['succes_inscription'],
-            ENT_QUOTES,
-            'UTF-8'
-        ) ?>
-    </p>
-    <?php unset($_SESSION['succes_inscription']); ?>
-<?php endif; ?><?php if (!empty($_SESSION['succes_inscription'])): ?>
     <p class="message succes">
         <?= htmlspecialchars(
             $_SESSION['succes_inscription'],
