@@ -17,20 +17,53 @@ Technologies : PHP 8.1+ (testé avec 8.3), MySQL 8 (ou MariaDB récent), WAMP.
 3. Dans phpMyAdmin, créer la base `migon` (interclassement `utf8mb4_unicode_ci`)
    puis importer le fichier SQL de la base.
 4. Vérifier les accès MySQL dans `config/database.php`
-   (par défaut : `localhost`, base `migon`, utilisateur `root`, sans mot de passe).
+   (par défaut : `localhost`, base `migon`, utilisateur `root`, sans mot de passe)
+   et les dossiers dans `config/app.php` (voir « Configuration »).
 5. Ouvrir `http://localhost/migon/`.
 
 > La géolocalisation du navigateur ne fonctionne que sur **HTTPS** ou sur
 > `localhost`. Pour tester depuis un téléphone sur le réseau local, passer par
 > HTTPS (ou un tunnel HTTPS) ; sinon, placer le repère sur la carte à la main.
 
+## Configuration
+
+Les paramètres sont regroupés dans le dossier `config/`. **Aucun chemin de
+dossier n'est écrit dans les pages.**
+
+| Fichier | Contenu |
+|---------|---------|
+| `config/database.php` | Connexion MySQL (valeurs par défaut pour WAMP) |
+| `config/app.php` | Dossiers de stockage : `dossier_photos` et `dossier_prive` |
+| `config/*.local.php` | Valeurs propres à une machine (non versionnées, voir `.gitignore`) |
+
+Ordre de priorité, du plus faible au plus fort : valeurs par défaut du fichier,
+puis `config/app.local.php` / `config/database.local.php`, puis variables
+d'environnement.
+
+| Variable d'environnement | Remplace |
+|--------------------------|----------|
+| `MIGON_DOSSIER_PHOTOS` | `dossier_photos` |
+| `MIGON_DOSSIER_PRIVE` | `dossier_prive` |
+| `MIGON_DB_HOST`, `MIGON_DB_NAME`, `MIGON_DB_USER`, `MIGON_DB_PASSWORD` | paramètres MySQL |
+
+Pour une installation autre que WAMP : copier `config/app.local.example.php` en
+`config/app.local.php` (et `config/database.local.example.php` en
+`config/database.local.php`), puis adapter les valeurs.
+
+**Chemins en base.** Les nouveaux fichiers sont enregistrés par leur seul nom
+(`photo_logement.chemin_photo`, `document_identite.chemin_fichier_prive`). Les
+anciennes lignes qui contiennent un chemin complet (`C:\wamp64\...`) restent
+lues correctement. Pour les convertir (nécessaire avant de déplacer les
+dossiers sur un autre serveur) : sauvegarder la base puis importer
+`migon_migration_chemins_relatifs.sql`.
+
 ## Arborescence
 
 ```
 admin/        identités, paiements d'abonnement et de réactivation
 chercheur/    espace chercheur : accueil et recherche de logements
-classes/      Database, Auth, Utilisateur, Notifications, Geolocalisation
-config/       paramètres de connexion à la base
+classes/      Database, Auth, Utilisateur, Notifications, Geolocalisation, Stockage
+config/       base de données et dossiers de stockage
 proprietaire/ espace propriétaire : logements, photos, quotas, abonnement
 public/       css/ (style.css) et js/ (position-logement.js)
 ```

@@ -4,8 +4,9 @@ session_start();
 
 require_once __DIR__ . '/classes/Database.php';
 require_once __DIR__ . '/classes/Utilisateur.php';
+require_once __DIR__ . '/classes/Stockage.php';
 
-$repertoirePrive = 'C:\\wamp64\\migon_prive';
+$repertoirePrive = Stockage::dossierPrive();
 
 $fichierEnregistre = null;
 
@@ -147,7 +148,7 @@ try {
         $motDePasse,
         $role,
         $typeDocument,
-        $cheminComplet
+        $nomFichier
     );
 
     // Supprimer le jeton utilisé pour éviter sa réutilisation.

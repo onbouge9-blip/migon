@@ -12,6 +12,7 @@ $rolesConnecte = is_array($_SESSION['utilisateur_roles'] ?? null)
 session_write_close();
 
 require_once __DIR__ . '/../classes/Database.php';
+require_once __DIR__ . '/../classes/Stockage.php';
 
 $idLogement = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 $idPhoto = filter_input(INPUT_GET, 'photo', FILTER_VALIDATE_INT);
@@ -66,7 +67,8 @@ try {
         exit;
     }
 
-    $cheminPhoto = $photo['chemin_photo'];
+    // Accepte l'ancien format (chemin complet) comme le nouveau (nom de fichier).
+    $cheminPhoto = Stockage::cheminPhoto((string) $photo['chemin_photo']);
 
     if (!$cheminPhoto || !is_file($cheminPhoto) || !is_readable($cheminPhoto)) {
         http_response_code(404);

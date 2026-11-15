@@ -3,6 +3,7 @@
 session_start();
 
 require_once __DIR__ . '/../classes/Database.php';
+require_once __DIR__ . '/../classes/Stockage.php';
 
 // 1. Vérifier la connexion
 if (empty($_SESSION['utilisateur_id'])) {
@@ -47,14 +48,15 @@ try {
     }
 
     // 4. Vérifier le dossier privé
-    $dossierPrive = realpath('C:/wamp64/migon_prive');
+    $dossierPrive = realpath(Stockage::dossierPrive());
 
     if ($dossierPrive === false) {
         throw new RuntimeException('Dossier privé introuvable.');
     }
 
     // 5. Récupérer le chemin réel du fichier
-    $cheminFichier = realpath($document['chemin_fichier_prive']);
+    // Accepte l'ancien format (chemin complet) comme le nouveau (nom de fichier).
+    $cheminFichier = realpath(Stockage::cheminPrive((string) $document['chemin_fichier_prive']));
 
     if ($cheminFichier === false || !is_file($cheminFichier)) {
         http_response_code(404);

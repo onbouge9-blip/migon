@@ -3,6 +3,7 @@ declare(strict_types=1);
 session_start();
 require_once __DIR__ . '/../classes/Database.php';
 require_once __DIR__ . '/../classes/Geolocalisation.php';
+require_once __DIR__ . '/../classes/Stockage.php';
 
 function echouer(string $message): never
 {
@@ -188,7 +189,7 @@ for ($i = 0; $i < $nombrePhotos; $i++) {
  * Le dossier doit exister et être accessible en écriture.
  * Les noms enregistrés sont aléatoires.
  */
-$dossierPhotos = 'C:\\wamp64\\migon_photos';
+$dossierPhotos = Stockage::dossierPhotos();
 
 if (!is_dir($dossierPhotos) || !is_writable($dossierPhotos)) {
     error_log('Le dossier de photos MIGON est absent ou non accessible en écriture.');
@@ -196,6 +197,7 @@ if (!is_dir($dossierPhotos) || !is_writable($dossierPhotos)) {
 }
 
 $fichiersDeplaces = [];
+$nomsFichiers = [];
 $pdo = null;
 
 try {
@@ -240,6 +242,7 @@ try {
         }
 
         $fichiersDeplaces[] = $destination;
+        $nomsFichiers[] = $nomFichier;
     }
 
     $pdo->beginTransaction();
@@ -336,10 +339,11 @@ try {
             (:id_logement, :chemin_photo, :est_principale, :ordre_affichage)'
     );
 
-    foreach ($fichiersDeplaces as $index => $chemin) {
+    // La base conserve uniquement le nom du fichier ; le dossier vient de la configuration.
+    foreach ($nomsFichiers as $index => $nomEnregistre) {
         $requetePhoto->execute([
             'id_logement' => $idLogement,
-            'chemin_photo' => $chemin,
+            'chemin_photo' => $nomEnregistre,
             'est_principale' => $index === 0 ? 1 : 0,
             'ordre_affichage' => $index + 1,
         ]);

@@ -3,6 +3,7 @@
 session_start();
 
 require_once __DIR__ . '/classes/Database.php';
+require_once __DIR__ . '/classes/Stockage.php';
 
 function echouerRenvoi(string $message): void
 {
@@ -93,7 +94,7 @@ if (!is_string($typeMime) || !isset($typesAutorises[$typeMime])) {
 }
 
 // Vérifier le dossier privé.
-$repertoirePrive = 'C:\\wamp64\\migon_prive';
+$repertoirePrive = Stockage::dossierPrive();
 
 if (!is_dir($repertoirePrive) || !is_writable($repertoirePrive)) {
     echouerRenvoi('Le stockage privé est indisponible. Contacte l’administrateur.');
@@ -166,7 +167,7 @@ try {
     $requete->execute([
         'id_utilisateur' => $idUtilisateur,
         'type_document' => $typeDocument,
-        'chemin_fichier_prive' => $cheminComplet
+        'chemin_fichier_prive' => $nomFichier
     ]);
 
     unset($_SESSION['csrf_renvoi_document']);

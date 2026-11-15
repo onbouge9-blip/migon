@@ -1,0 +1,2 @@
+# Configuration propre à chaque machine (mots de passe, chemins)
+config/*.local.php
